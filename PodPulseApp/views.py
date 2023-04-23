@@ -42,7 +42,11 @@ class AddAudioFiles(generics.GenericAPIView):
             return Response({
                 'message':'error is saving the file'
             })
+    def get(self,request):
+        
+        pass
 class AddVedioFiles(generics.GenericAPIView):
+    authentication_classes = (TokenAuthentication,)
     permission_classes=(permissions.IsAuthenticated,)
     def post(self,request,format=None):
         serializer=UploadVideoSerializer(data=request.DATA,files=request.FILES)
