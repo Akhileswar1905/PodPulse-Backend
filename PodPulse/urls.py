@@ -35,6 +35,7 @@ urlpatterns = [
     path('api/addvideofavourates/',views.AddUserFavouratesAudios.as_view()),#add a video podcast into favourate
     path('api/favourateaudios/',views.GetFavourateAudios.as_view()),#to retrive favourate audio podcasts
     path('api/favouratevideos/',views.GetFavourateVideos.as_view()),#to retrive favourate vedio podcasts
+    path('api/search/',views.Search.as_view()),#search for a podcast
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
 
 #Note to access the audio and video file after making the api request

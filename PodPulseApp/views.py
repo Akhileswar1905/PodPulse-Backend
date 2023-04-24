@@ -170,3 +170,29 @@ class GetFavourateVideos(generics.GenericAPIView):
             querySet.append(obj)
         jsonData=json.dumps(querySet)
         return  Response(jsonData)
+class Search(generics.GenericAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes=(permissions.IsAuthenticated,)
+    def post(self,request,format=None):
+        obj=request.data
+        if obj['type']=='audio':
+            query=UploadAudio.objects.filter(PodcastName__icontains=obj['searchString']).values()
+            querySet=[]
+            for i in query:
+                obj={
+                    'PodcastName':i['PodcastName'],
+                    'PodcastFile':i['PodcastFile']
+                }
+                querySet.append(obj)
+            return Response(json.dumps(querySet))
+        if obj['type']=='video':
+            query=UploadVideo.objects.filter(PodcastName__icontains=obj['searchString']).values()
+            querySet=[]
+            for i in query:
+                obj={
+                    'PodcastName':i['PodcastName'],
+                    'PodcastFile':i['PodcastFile']
+                }
+                querySet.append(obj)
+            return Response(json.dumps(querySet))
+        

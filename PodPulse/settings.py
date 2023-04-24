@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-e$+-2tl@pz0&2a7dwl(jhfo%^bc2yn2tmuj^ij24e!03$xs5w)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app']
 
 
 # Application definition
@@ -105,7 +105,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'PodPulse.wsgi.application'
+WSGI_APPLICATION = 'PodPulse.wsgi.app'
 
 
 # Database
