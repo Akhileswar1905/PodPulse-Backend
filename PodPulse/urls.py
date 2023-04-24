@@ -28,5 +28,8 @@ urlpatterns = [
     path('api/logoutall/', knox_views.LogoutAllView.as_view(), name='logoutall'),
     re_path(r'^auth/', include('drf_social_oauth2.urls', namespace='drf')),
     path('api/addAudio/',views.AddAudioFiles.as_view()),
-    path('api/addVideo/',views.AddVedioFiles.as_view())
+    path('api/addVideo/',views.AddVideoFiles.as_view()),
+    path('api/audiopodcasts/',views.GetAudioFiles.as_view()),
+    path('api/audiofavourates/',views.AddUserFavouratesAudios.as_view()),
+    path('api/favourateaudios/',views.GetFavourateAudios.as_view())
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

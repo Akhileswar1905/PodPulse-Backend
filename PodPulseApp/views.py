@@ -1,17 +1,19 @@
 from django.shortcuts import render
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework import generics, permissions
 from knox.auth import TokenAuthentication
 from rest_framework.response import Response
 from knox.models import AuthToken
-from .serializers import UserSerializer, RegisterSerializer,UploadAudioSerializer,UploadVideoSerializer
+from .serializers import UserSerializer, RegisterSerializer,UploadAudioSerializer,UploadVideoSerializer,FavourateAudiosSerializer,FavourateVideosSerializer
 from django.contrib.auth import login
 from rest_framework import permissions
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from knox.views import LoginView as KnoxLoginView
+from .models import UploadAudio,UploadVideo,RatingAudio,FavourateAudios,FavourateVideos,RatingVideo
 # Register API
 class RegisterAPI(generics.GenericAPIView):
     serializer_class = RegisterSerializer
-
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -42,14 +44,11 @@ class AddAudioFiles(generics.GenericAPIView):
             return Response({
                 'message':'error is saving the file'
             })
-    def get(self,request):
-        
-        pass
-class AddVedioFiles(generics.GenericAPIView):
+class AddVideoFiles(generics.GenericAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes=(permissions.IsAuthenticated,)
     def post(self,request,format=None):
-        serializer=UploadVideoSerializer(data=request.DATA,files=request.FILES)
+        serializer=UploadVideoSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({
@@ -59,3 +58,115 @@ class AddVedioFiles(generics.GenericAPIView):
             return Response({
                 'message':'error is saving the file'
             })
+class GetAudioFiles(generics.GenericAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes=(permissions.IsAuthenticated,)
+    def get(self,request,format=None):
+        ids=RatingAudio.objects.all().order_by('-rating').values()
+        ids=[[i['audio_id'],i['rating']] for i in ids]
+        querySet=[]
+        for i in ids:
+            query=UploadAudio.objects.get(id=i[0])
+            audio =query.PodcastFile
+            audio=str(audio)
+            obj={
+                'PodcastName':query.PodcastName,
+                'SpeakerName':query.SpeakerName,
+                'PodcastDescription':query.PodcastDescription,
+                'PodcastFile':audio,
+                'rating':i[1]
+            }
+            querySet.append(obj)
+        jsonData=json.dumps(querySet)
+        return  Response(jsonData)
+class GetVideoFiles(generics.GenericAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes=(permissions.IsAuthenticated,)
+    def get(self,request,format=None):
+        ids=RatingVideo.objects.all().order_by('-rating').values()
+        ids=[[i['video_id'],i['rating']] for i in ids]
+        querySet=[]
+        for i in ids:
+            query=UploadVideo.objects.get(id=i[0])
+            video =query.PodcastFile
+            video=str(video)
+            obj={
+                'PodcastName':query.PodcastName,
+                'SpeakerName':query.SpeakerName,
+                'PodcastDescription':query.PodcastDescription,
+                'PodcastFile':video,
+                'rating':i[1]
+            }
+            querySet.append(obj)
+        jsonData=json.dumps(querySet)
+        return  Response(jsonData)
+class AddUserFavouratesAudios(generics.GenericAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes=(permissions.IsAuthenticated,)
+    def post(self,request,format=None):
+        serializer=FavourateAudiosSerializer(data={'userid':request.user.id,'audioid':request.data['audioid'][0]})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'message':'saved the audio favourates successfully'
+            })
+        else:
+            return Response({
+                'message':'error is saving the file'
+            })
+class AddUserFavouratesVideos(generics.GenericAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes=(permissions.IsAuthenticated,)
+    def post(self,request,format=None):
+        serializer=FavourateVideosSerializer(data={'userid':request.user.id,'videoid':request.data['videoid'][0]})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'message':'saved the audio favourates successfully'
+            })
+        else:
+            return Response({
+                'message':'error is saving the file'
+            })
+class GetFavourateAudios(generics.GenericAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes=(permissions.IsAuthenticated,)
+    def get(self,request,format=None):
+        ids=FavourateAudios.objects.filter(userid=request.user.id).values()
+        querySet=[]
+        for i in ids:
+            id=i['audioid']
+            query=UploadAudio.objects.get(id=id)
+            audio =query.PodcastFile
+            audio=str(audio)
+            obj={
+                'PodcastName':query.PodcastName,
+                'SpeakerName':query.SpeakerName,
+                'PodcastDescription':query.PodcastDescription,
+                'PodcastFile':audio,
+                'rating':RatingAudio.objects.get(audio=id).rating
+            }
+            querySet.append(obj)
+        jsonData=json.dumps(querySet)
+        return  Response(jsonData)
+class GetFavourateVideos(generics.GenericAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes=(permissions.IsAuthenticated,)
+    def get(self,request,format=None):
+        ids=FavourateVideos.objects.filter(userid=request.user.id).values()
+        querySet=[]
+        for i in ids:
+            id=i['audioid']
+            query=UploadVideo.objects.get(id=id)
+            audio =query.PodcastFile
+            audio=str(audio)
+            obj={
+                'PodcastName':query.PodcastName,
+                'SpeakerName':query.SpeakerName,
+                'PodcastDescription':query.PodcastDescription,
+                'PodcastFile':audio,
+                'rating':RatingVideo.objects.get(audio=id).rating
+            }
+            querySet.append(obj)
+        jsonData=json.dumps(querySet)
+        return  Response(jsonData)
